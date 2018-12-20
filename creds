@@ -1,0 +1,19 @@
+#!/bin/bash
+
+curl -s -k -H 'Accept: application/json;charset=utf-8' -d 'grant_type=password' -d username=$OM_USER -d password=$OM_PASSWORD -u 'opsman:' https://$OM_HOSTNAME/uaa/oauth/token > /tmp/auth.txt
+cat /tmp/auth.txt | jq
+ACCESS_TOKEN=`cat /tmp/auth.txt | jq '.access_token' | tr -d '"'`
+#echo Access Token: $ACCESS_TOKEN
+
+if [ "$#" -eq 0 ]; then
+  curl -v -H "Authorization: bearer $ACCESS_TOKEN" -k https://$OM_HOSTNAME/api/v0/deployed/products > /tmp/products.txt
+  cat /tmp/products.txt | jq
+fi
+if [ "$#" -eq 1 ]; then
+  curl -v -H "Authorization: bearer $ACCESS_TOKEN" -k https://$OM_HOSTNAME/api/v0/deployed/products/$1/credentials > /tmp/creds.txt
+  cat /tmp/creds.txt | jq
+fi
+if [ "$#" -eq 2 ]; then
+  curl -v -H "Authorization: bearer $ACCESS_TOKEN" -k https://$OM_HOSTNAME/api/v0/deployed/products/$1/credentials/$2 > /tmp/cred.txt
+  cat /tmp/cred.txt | jq
+fi
